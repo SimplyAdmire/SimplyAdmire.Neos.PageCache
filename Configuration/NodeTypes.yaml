@@ -1,0 +1,9 @@
+'TYPO3.Neos:Page':
+  properties:
+    noCache:
+     type: boolean
+     ui:
+       label: 'Do not cache page'
+       inspector:
+         group: 'document'
+

@@ -1,0 +1,29 @@
+SimplyAdmire\Neos\PageCache\Service\PageCacheService:
+  properties:
+    pageCache:
+      object:
+        factoryObjectName: TYPO3\Flow\Cache\CacheManager
+        factoryMethodName: getCache
+        arguments:
+          1:
+            value: SimplyAdmire_Neos_PageCache_PageCache
+
+SimplyAdmire\Neos\PageCache\Aop\PageCachingAspect:
+  properties:
+    pageCache:
+      object:
+        factoryObjectName: TYPO3\Flow\Cache\CacheManager
+        factoryMethodName: getCache
+        arguments:
+          1:
+            value: SimplyAdmire_Neos_PageCache_PageCache
+
+SimplyAdmire\Neos\PageCache\Command\CleanCommandController:
+  properties:
+    pageCache:
+      object:
+        factoryObjectName: TYPO3\Flow\Cache\CacheManager
+        factoryMethodName: getCache
+        arguments:
+          1:
+            value: SimplyAdmire_Neos_PageCache_PageCache

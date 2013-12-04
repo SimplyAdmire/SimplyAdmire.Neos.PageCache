@@ -1,0 +1,6 @@
+SimplyAdmire:
+  Neos:
+    PageCache:
+      cache:
+        enable: FALSE
+

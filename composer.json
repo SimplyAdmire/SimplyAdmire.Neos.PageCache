@@ -1,0 +1,14 @@
+{
+    "name": "simplyadmire/neos-pagecache",
+    "type": "typo3-flow-package",
+    "description": null,
+    "version": null,
+    "require": {
+        "typo3/neos": "*"
+    },
+    "autoload": {
+        "psr-0": {
+            "SimplyAdmire\\Neos\\PageCache": "Classes"
+        }
+    }
+}
