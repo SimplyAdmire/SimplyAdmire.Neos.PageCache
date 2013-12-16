@@ -79,7 +79,7 @@ class PageCachingAspect {
 		}
 
 		if ($request->getControllerObjectName() === 'TYPO3\Neos\Controller\Frontend\NodeController'
-				&& !$this->accessDecisionManager->hasAccessToResource('TYPO3_Neos_Backend_BackendController')
+				&& !$this->accessDecisionManager->hasAccessToResource('TYPO3_Neos_Backend_GeneralAccess')
 				&& count($this->flashMessageContainer->getMessages()) === 0) {
 			$httpRequest = $request->getHttpRequest();
 

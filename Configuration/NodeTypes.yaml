@@ -1,4 +1,4 @@
-'TYPO3.Neos:Page':
+'TYPO3.Neos.NodeTypes:Page':
   properties:
     noCache:
      type: boolean
