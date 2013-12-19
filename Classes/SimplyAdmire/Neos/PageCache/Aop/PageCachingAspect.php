@@ -7,11 +7,11 @@ use TYPO3\Flow\Http\Request as HttpRequest;
 use TYPO3\Flow\Mvc\ActionRequest;
 use TYPO3\Flow\Mvc\Controller\ActionController;
 use TYPO3\Flow\Mvc\RequestInterface;
+use TYPO3\Flow\Utility\Files;
 
 /**
  * An aspect which provides a simple page cache
  *
- * @Flow\Scope("singleton")
  * @Flow\Aspect
  */
 class PageCachingAspect {
@@ -26,16 +26,23 @@ class PageCachingAspect {
 	protected $flashMessageContainer;
 
 	/**
-	 * @var \TYPO3\Flow\Security\Authorization\AccessDecisionManagerInterface
 	 * @Flow\Inject
+	 * @var \TYPO3\Flow\Security\Authentication\AuthenticationManagerInterface
 	 */
-	protected $accessDecisionManager;
+	protected $authenticationManager;
 
 	/**
 	 * @Flow\Inject
 	 * @var \TYPO3\Flow\Cache\Frontend\StringFrontend
 	 */
 	protected $pageCache;
+
+	/**
+	 * @var array
+	 */
+	protected $staticCachableContentTypes = array(
+		'text/html'
+	);
 
 	/**
 	 * @param JoinPointInterface $joinPoint
@@ -58,8 +65,9 @@ class PageCachingAspect {
 	 * @Flow\Around("setting(SimplyAdmire.Neos.PageCache.cache.enable) && method(TYPO3\Flow\Mvc\Dispatcher->dispatch())")
 	 */
 	public function dispatchAdvice(JoinPointInterface $joinPoint) {
-		/* @var \TYPO3\Flow\Mvc\RequestInterface $request */
+		/** @var \TYPO3\Flow\Mvc\RequestInterface $request */
 		$request = $joinPoint->getMethodArgument('request');
+		/** @var \TYPO3\Flow\Http\Response $response */
 		$response = $joinPoint->getMethodArgument('response');
 
 		if ($request instanceof \TYPO3\Flow\Cli\Request) {
@@ -67,20 +75,7 @@ class PageCachingAspect {
 			return;
 		}
 
-		$response->setHeader('X-Flow-Controller', $request->getControllerName());
-
-		$flashMessages = $this->flashMessageContainer->getMessages();
-
-		if (count($flashMessages) === 1 && $flashMessages[0]->getMessage() === 'Your new comment was created.') {
-			$this->pageCache->flush();
-			$joinPoint->getAdviceChain()->proceed($joinPoint);
-			$response->setHeader('X-Flow-PageCache', 'pass (ignore)');
-			return;
-		}
-
-		if ($request->getControllerObjectName() === 'TYPO3\Neos\Controller\Frontend\NodeController'
-				&& !$this->accessDecisionManager->hasAccessToResource('TYPO3_Neos_Backend_GeneralAccess')
-				&& count($this->flashMessageContainer->getMessages()) === 0) {
+		if ($request->getControllerObjectName() === 'TYPO3\Neos\Controller\Frontend\NodeController' && !$this->authenticationManager->isAuthenticated()) {
 			$httpRequest = $request->getHttpRequest();
 
 			if (!$httpRequest->isMethodSafe()) {
@@ -90,25 +85,17 @@ class PageCachingAspect {
 			}
 
 			$cacheIdentifier = sha1($httpRequest->getUri());
-			$cacheEntry = $this->pageCache->get($cacheIdentifier);
-
-			if ($cacheEntry !== FALSE) {
-				$cacheEntry = unserialize($cacheEntry);
-				$response->setHeaders($cacheEntry['headers']);
-				$response->setcontent($cacheEntry['content']);
-				$response->setHeader('X-Flow-PageCache', 'fetch');
-				return;
-			}
-
 			$joinPoint->getAdviceChain()->proceed($joinPoint);
 
 			if (!$response->hasHeader('X-Flow-PageCache') || $response->getHeader('X-Flow-PageCache') !== 'pass (ignore)') {
 				$cacheEntry = array(
-					'headers' => $response->getHeaders(),
+					'host' => $httpRequest->getUri()->getHost(),
+					'path' => $httpRequest->getUri()->getPath(),
+					'format' => $request->getFormat(),
 					'content' => $response->getContent()
 				);
 
-				$this->pageCache->set($cacheIdentifier, serialize($cacheEntry));
+				$this->pageCache->set($cacheIdentifier, $cacheEntry);
 				$response->setHeader('X-Flow-PageCache', 'store');
 			}
 		} else {

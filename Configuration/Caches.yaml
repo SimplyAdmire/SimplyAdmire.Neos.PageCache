@@ -1,3 +1,6 @@
 SimplyAdmire_Neos_PageCache_PageCache:
-  frontend: TYPO3\Flow\Cache\Frontend\StringFrontend
-  backend: TYPO3\Flow\Cache\Backend\FileBackend
+  frontend: SimplyAdmire\Neos\PageCache\Cache\Frontend\StaticFileFrontend
+  backend: SimplyAdmire\Neos\PageCache\Cache\Backend\StaticFileBackend
+  backendOptions:
+    cachedFormats: ['html']
+    sanitize: TRUE
