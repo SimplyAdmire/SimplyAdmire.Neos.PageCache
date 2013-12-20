@@ -63,9 +63,6 @@ class StaticFileBackend extends SimpleFileBackend {
 			return;
 		}
 		$path = $data['path'];
-		if (strpos($path, '.') !== FALSE) {
-			$path = substr($path, 0, strrpos($path, '.'));
-		}
 		$path = Files::concatenatePaths(array($this->getCacheDirectory(), $data['host'], $path, 'index.' . $data['format']));
 		Files::createDirectoryRecursively(dirname($path));
 
