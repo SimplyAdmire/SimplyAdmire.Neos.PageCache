@@ -63,7 +63,7 @@ class StaticFileBackend extends SimpleFileBackend {
 			return;
 		}
 		$path = $data['path'];
-		if (!strpos($path, '@') !== FALSE) {
+		if (strpos($path, '@') !== FALSE) {
 			// Make sure we don't write a cache file for personal workspaces
 			// This could happen if a Neos session is expired and the user clicks on a node in the node tree for example
 			return;
