@@ -3,11 +3,10 @@ namespace SimplyAdmire\Neos\PageCache\Aop;
 
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Flow\Aop\JoinPointInterface;
-use TYPO3\Flow\Http\Request as HttpRequest;
-use TYPO3\Flow\Mvc\ActionRequest;
-use TYPO3\Flow\Mvc\Controller\ActionController;
-use TYPO3\Flow\Mvc\RequestInterface;
-use TYPO3\Flow\Utility\Files;
+use TYPO3\Flow\Core\Bootstrap;
+use TYPO3\Flow\Http\RequestHandler as HttpRequestHandler;
+use TYPO3\Flow\Utility\Now;
+use TYPO3\TYPO3CR\Domain\Model\NodeInterface;
 
 /**
  * An aspect which provides a simple page cache
@@ -15,6 +14,18 @@ use TYPO3\Flow\Utility\Files;
  * @Flow\Aspect
  */
 class PageCachingAspect {
+
+	/**
+	 * @Flow\Inject(lazy="false")
+	 * @var Now
+	 */
+	protected $now;
+
+	/**
+	 * @Flow\Inject
+	 * @var Bootstrap
+	 */
+	protected $bootstrap;
 
 	/**
 	 * The flash messages. Use $this->flashMessageContainer->addMessage(...) to add a new Flash
@@ -54,6 +65,32 @@ class PageCachingAspect {
 
 		if ($node->getProperty('noCache')) {
 			$joinPoint->getProxy()->getControllerContext()->getResponse()->setHeader('X-Flow-PageCache', 'pass (ignore)');
+		}
+	}
+
+	/**
+	 * @param JoinPointInterface $joinPoint
+	 * @return void
+	 * @Flow\Before("setting(SimplyAdmire.Neos.PageCache.cache.enable) && method(TYPO3\TYPO3CR\Domain\Factory\NodeFactory->filterNodeByContext())")
+	 */
+	public function handleVisibility(JoinPointInterface $joinPoint) {
+		/** @var HttpRequestHandler $requestHandler */
+		$requestHandler = $this->bootstrap->getActiveRequestHandler();
+		if (!$requestHandler instanceof HttpRequestHandler) {
+			return;
+		}
+
+		$response = $requestHandler->getHttpResponse();
+		if ($response->hasHeader('X-Flow-PageCache') && $response->getHeader('X-Flow-PageCache') === 'pass (ignore)') {
+			return;
+		}
+
+		/** @var NodeInterface $node */
+		$node = $joinPoint->getMethodArgument('node');
+		if (	($node->getHiddenBeforeDateTime() instanceof \DateTime && $node->getHiddenBeforeDateTime() > $this->now)
+			||	($node->getHiddenAfterDateTime() instanceof \DateTime && $node->getHiddenAfterDateTime() > $this->now)
+		) {
+			$response->setHeader('X-Flow-PageCache', 'pass (ignore)');
 		}
 	}
 
