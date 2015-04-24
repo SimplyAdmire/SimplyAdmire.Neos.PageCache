@@ -1,12 +1,10 @@
 <?php
 namespace SimplyAdmire\Neos\PageCache\Cache\Frontend;
 
-class StaticFileFrontend extends \TYPO3\Flow\Cache\Frontend\StringFrontend {
-//
-//	/**
-//	 * Pattern an entry identifier must match.
-//	 */
-//	const PATTERN_ENTRYIDENTIFIER = '/^[a-zA-Z0-9_\.\/%\-&]{1,250}$/';
+use TYPO3\Flow\Cache\Exception\InvalidDataException;
+use TYPO3\Flow\Cache\Frontend\StringFrontend;
+
+class StaticFileFrontend extends StringFrontend {
 
 	/**
 	 * Saves the value of a PHP variable in the cache.
@@ -16,7 +14,7 @@ class StaticFileFrontend extends \TYPO3\Flow\Cache\Frontend\StringFrontend {
 	 * @param array $tags Tags to associate with this cache entry
 	 * @param integer $lifetime Lifetime of this cache entry in seconds. If NULL is specified, the default lifetime is used. "0" means unlimited lifetime.
 	 * @return void
-	 * @throws \TYPO3\Flow\Cache\Exception\InvalidDataException
+	 * @throws InvalidDataException
 	 * @throws \InvalidArgumentException
 	 * @api
 	 */
@@ -25,7 +23,7 @@ class StaticFileFrontend extends \TYPO3\Flow\Cache\Frontend\StringFrontend {
 			throw new \InvalidArgumentException('"' . $entryIdentifier . '" is not a valid cache entry identifier.', 1233057566);
 		}
 		if (!is_array($data)) {
-			throw new \TYPO3\Flow\Cache\Exception\InvalidDataException('Given data is of type "' . gettype($data) . '", but an array is expected for static file cache.', 1222808333);
+			throw new InvalidDataException('Given data is of type "' . gettype($data) . '", but an array is expected for static file cache.', 1222808333);
 		}
 		foreach ($tags as $tag) {
 			if (!$this->isValidTag($tag)) {

@@ -3,7 +3,9 @@ namespace SimplyAdmire\Neos\PageCache\Cache\Backend;
 
 use TYPO3\Flow\Cache\Backend\SimpleFileBackend;
 use TYPO3\Flow\Cache\Frontend\FrontendInterface;
+use TYPO3\Flow\Utility\Exception;
 use TYPO3\Flow\Utility\Files;
+use TYPO3\Flow\Cache\Exception as CacheException;
 
 class StaticFileBackend extends SimpleFileBackend {
 
@@ -23,7 +25,7 @@ class StaticFileBackend extends SimpleFileBackend {
 	 *
 	 * @param \TYPO3\Flow\Cache\Frontend\FrontendInterface $cache The cache frontend
 	 * @return void
-	 * @throws \TYPO3\Flow\Cache\Exception
+	 * @throws CacheException
 	 */
 	public function setCache(FrontendInterface $cache) {
 		parent::setCache($cache);
@@ -31,23 +33,23 @@ class StaticFileBackend extends SimpleFileBackend {
 		$cacheDirectory = FLOW_PATH_WEB . '_Resources/Cache/' . $this->cacheIdentifier;
 		if (!is_writable($cacheDirectory)) {
 			try {
-				\TYPO3\Flow\Utility\Files::createDirectoryRecursively($cacheDirectory);
-			} catch (\TYPO3\Flow\Utility\Exception $exception) {
-				throw new \TYPO3\Flow\Cache\Exception('The cache directory "' . $cacheDirectory . '" could not be created.', 1387488916);
+				Files::createDirectoryRecursively($cacheDirectory);
+			} catch (Exception $exception) {
+				throw new CacheException('The cache directory "' . $cacheDirectory . '" could not be created.', 1387488916);
 			}
 		}
 		if (!is_dir($cacheDirectory) && !is_link($cacheDirectory)) {
-			throw new \TYPO3\Flow\Cache\Exception('The cache directory "' . $cacheDirectory . '" does not exist.', 1387488917);
+			throw new CacheException('The cache directory "' . $cacheDirectory . '" does not exist.', 1387488917);
 		}
 		if (!is_writable($cacheDirectory)) {
-			throw new \TYPO3\Flow\Cache\Exception('The cache directory "' . $cacheDirectory . '" is not writable.', 1387488918);
+			throw new CacheException('The cache directory "' . $cacheDirectory . '" is not writable.', 1387488918);
 		}
 
 		$this->cacheDirectory = $cacheDirectory;
 		$this->cacheEntryFileExtension = '';
 
 		if ((strlen($this->cacheDirectory) + 23) > $this->environment->getMaximumPathLength()) {
-			throw new \TYPO3\Flow\Cache\Exception('The length of the temporary cache path "' . $this->cacheDirectory . '" exceeds the maximum path length of ' . ($this->environment->getMaximumPathLength() - 23) . '. Please consider setting the temporaryDirectoryBase option to a shorter path. ', 1387488919);
+			throw new CacheException('The length of the temporary cache path "' . $this->cacheDirectory . '" exceeds the maximum path length of ' . ($this->environment->getMaximumPathLength() - 23) . '. Please consider setting the temporaryDirectoryBase option to a shorter path. ', 1387488919);
 		}
 	}
 

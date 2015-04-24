@@ -2,11 +2,12 @@
 namespace SimplyAdmire\Neos\PageCache\Command;
 
 use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Flow\Cli\CommandController;
 
 /**
  * @Flow\Scope("singleton")
  */
-class CleanCommandController extends \TYPO3\Flow\Cli\CommandController {
+class CleanCommandController extends CommandController {
 
 	/**
 	 * @Flow\Inject
