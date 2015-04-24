@@ -1,8 +1,7 @@
 {
 	"name": "simplyadmire/neos-pagecache",
 	"type": "typo3-flow-package",
-	"description": null,
-	"version": null,
+	"license": "LGPL-3.0",
 	"require": {
 		"typo3/neos": "*"
 	},
